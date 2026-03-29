@@ -1,7 +1,10 @@
 import socket
+import os
 
 SERVER_HOST = ""
 SERVER_PORT = 8080
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def load_file(filename):
     with open(filename, 'rb') as file_handle:
@@ -27,7 +30,7 @@ def handle_request(request_method, headers):
 
     if request_method == "GET":
         try:
-            address = ("./htdocs" + filename)
+            address = os.path.join(BASE_DIR, filename.lstrip('/'))
             content = load_file(address)
             print(content)
             responde_command = "HTTP/1.1 200 OK\n\n".encode()
@@ -37,7 +40,7 @@ def handle_request(request_method, headers):
 
     if request_method == "POST":
         try:
-            address = ("./htdocs/" + filename)
+            address = os.path.join(BASE_DIR, filename.lstrip('/'))
             response_content = read_html(headers[0].split())
             print(response_content)
             write_file(address,response_content)
