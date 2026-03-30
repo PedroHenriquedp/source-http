@@ -11,19 +11,10 @@ def load_file(filename):
         return file_handle.read()
 
 def write_file(filename,content):
-    with open(filename, "w") as file:
+    with open(filename, "wb") as file:
         file.write(content)
 
-def read_html(content):
-    i=2
-    response_content_html = ""
-    while content[i] != "/0":
-        response_content_html += headers[0].split()[i] + " "
-        i += 1
-    return response_content_html
-
-
-def handle_request(request_method, headers):
+def handle_request(request_method, headers, body, client_connection):
     filename = headers[0].split()[1]
     if filename == "/":
         filename = "/index.html"
@@ -32,18 +23,16 @@ def handle_request(request_method, headers):
         try:
             address = os.path.join(BASE_DIR, filename.lstrip('/'))
             content = load_file(address)
-            print(content)
             responde_command = "HTTP/1.1 200 OK\n\n".encode()
             response = responde_command + content
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            print(e)
             response = "HTTP/1.1 404 NOT FOUND\n\nERROR 404!File Not Found!".encode()
 
     if request_method == "POST":
         try:
             address = os.path.join(BASE_DIR, filename.lstrip('/'))
-            response_content = read_html(headers[0].split())
-            print(response_content)
-            write_file(address,response_content)
+            write_file(address, body)
             content = load_file(address)
             responde_command = "HTTP/1.1 200 OK\n\n".encode()
             response = responde_command + content
@@ -65,12 +54,38 @@ print("Escutando por conexões na porta %s" % SERVER_PORT)
 
 while True:
     client_connection, client_address = server_socket.accept()
-    request = client_connection.recv(1024).decode()
+    
+    request_data = b""
 
-    if request:
-        headers = request.split("\n")
-        request_method = headers[0].split()[0]
+    while b"\r\n\r\n" not in request_data:
+        chunk = client_connection.recv(1024)
+        
+        if chunk == b"": 
+            break           
+        request_data += chunk
 
-        handle_request(request_method,headers)
+    parts = request_data.split(b"\r\n\r\n", 1)
+    text_header = parts[0].decode()
+    
+    body = b""
+    if len(parts) > 1:
+        body = parts[1]
+
+    headers_list = text_header.split("\r\n")
+    first_line = headers_list[0]
+    request_method = first_line.split()[0]
+
+    file_weight = 0
+    for line in headers_list:
+        if "content-length:" in line.lower():
+            file_weight = int(line.split(":")[1].strip())
+
+    while len(body) < file_weight:
+        slice = client_connection.recv(1024)
+        if slice == b"":
+            break
+        body += slice
+
+    handle_request(request_method, headers_list, body, client_connection)
 
 server_socket.close()
