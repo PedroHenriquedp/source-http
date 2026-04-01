@@ -1,5 +1,6 @@
 import socket
 import os
+import json
 
 SERVER_HOST = ""
 SERVER_PORT = 8080
@@ -17,7 +18,7 @@ def write_file(filename,content):
 def handle_request(request_method, headers, body, client_connection):
     filename = headers[0].split()[1]
     if filename == "/":
-        filename = "/index.html"
+        filename = "/login.html"
 
     if request_method == "GET":
         try:
@@ -30,15 +31,20 @@ def handle_request(request_method, headers, body, client_connection):
             response = "HTTP/1.1 404 NOT FOUND\n\nERROR 404!File Not Found!".encode()
 
     if request_method == "POST":
-        try:
-            address = os.path.join(BASE_DIR, filename.lstrip('/'))
-            write_file(address, body)
-            content = load_file(address)
-            responde_command = "HTTP/1.1 200 OK\n\n".encode()
-            response = responde_command + content
-        except Exception as e:
-            print(e)
-            response = "HTTP/1.1 500 INTERNAL SERVER ERROR\n\nERROR 500!Internal Server Error!".encode()
+        match filename:
+            case "/login.html":
+                try:
+                    
+                    data = json.loads(body.decode())
+                    email = data.get("email")
+                    senha = data.get("senha")
+
+                    content = load_file("index.html")
+                    responde_command = "HTTP/1.1 200 OK\n\n".encode()
+                    response = responde_command + content
+                except Exception as e:
+                    print(e)
+                    response = "HTTP/1.1 500 INTERNAL SERVER ERROR\n\nERROR 500!Internal Server Error!".encode()
 
     client_connection.sendall(response)
     client_connection.close()
