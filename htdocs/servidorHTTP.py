@@ -1,6 +1,7 @@
 import socket
 import os
 import json
+import mimetypes
 
 SERVER_HOST = ""
 SERVER_PORT = 8080
@@ -24,8 +25,11 @@ def handle_request(request_method, headers, body, client_connection):
         try:
             address = os.path.join(BASE_DIR, filename.lstrip('/'))
             content = load_file(address)
-            responde_command = "HTTP/1.1 200 OK\n\n".encode()
-            response = responde_command + content
+            mime_type, _ = mimetypes.guess_type(address)
+            if mime_type is None:
+                mime_type = "text/html"
+            header = f"HTTP/1.1 200 OK\r\nContent-Type: {mime_type}; charset=utf-8\r\n\r\n"
+            response = header.encode() + content
         except FileNotFoundError as e:
             print(e)
             response = "HTTP/1.1 404 NOT FOUND\n\nERROR 404!File Not Found!".encode()

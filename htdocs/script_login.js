@@ -18,7 +18,7 @@ form.addEventListener("submit", async (e) => {
   const senha = document.getElementById("senha").value;
 
   try {
-    const response = await fetch("http://127.0.0.1:8080/login.html", {
+    const response = await fetch("/login.html", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

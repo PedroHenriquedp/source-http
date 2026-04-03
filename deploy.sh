@@ -7,6 +7,8 @@ cd ~/source-http || exit
 echo "⬇️  Puxando as alterações do repositório..."
 git pull
 
+cd htdocs || exit
+
 echo "🏗️  Reconstruindo e reiniciando o container..."
 docker compose up -d --build
 
