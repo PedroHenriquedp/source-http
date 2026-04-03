@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  servidor-http:
+    build: .
+    container_name: projeto_http
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
