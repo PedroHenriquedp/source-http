@@ -1,4 +1,3 @@
-// Mostrar / ocultar senha
 const toggle = document.getElementById("toggleSenha");
 const senhaInput = document.getElementById("senha");
 
@@ -8,7 +7,6 @@ toggle.addEventListener("click", () => {
   toggle.textContent = type === "password" ? "Mostrar Senha" : "Ocultar Senha";
 });
 
-// Envio do formulário via POST para 127.0.0.1:8080
 const form = document.getElementById("loginForm");
 
 form.addEventListener("submit", async (e) => {
@@ -29,7 +27,6 @@ form.addEventListener("submit", async (e) => {
       })
     });
 
-    // Tenta ler JSON (se o servidor retornar)
     let data;
     try {
       data = await response.json();

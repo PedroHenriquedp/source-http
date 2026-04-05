@@ -45,23 +45,26 @@ def handle_request(request_method, headers, body, client_connection):
                     senha = data.get("senha")
 
                     try:
-                        with open('users.json', 'r') as f:
+                        with open(os.path.join(BASE_DIR, 'users.json'), 'r') as f:
                             users = json.load(f)
                     except FileNotFoundError:
                         print("Error: User database not found.")
+                        erro_msg = json.dumps({"status": "error", "message": "Banco de dados não encontrado"}).encode('utf-8')
+                        response = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
+                        client_connection.sendall(response)
+                        client_connection.close()
                         return
-
                     if email in users and users[email] == senha:
-                        content = load_file("index.html")
-                        responde_command = "HTTP/1.1 200 OK\n\n".encode()
+                        content = json.dumps({"status": "success", "message": "Login aprovado"}).encode('utf-8')
+                        responde_command = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode()
                     else:
-                        content = json.dumps({"status": "error", "message": "Login Inválido"}).encode()
-                        responde_command = "HTTP/1.1 401 UNAUTHORIZED\n\n".encode()
+                        content = json.dumps({"status": "error", "message": "Login Inválido"}).encode('utf-8')
+                        responde_command = "HTTP/1.1 401 UNAUTHORIZED\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode()
                     
                     response = responde_command + content
                 except Exception as e:
                     print(e)
-                    response = "HTTP/1.1 500 INTERNAL SERVER ERROR\n\nERROR 500!Internal Server Error!".encode()
+                    response = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\n\r\nERROR 500! Internal Server Error!".encode()
             
             case "/index.html":
                 try:
