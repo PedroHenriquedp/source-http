@@ -2,40 +2,67 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Home - Provisório</title>
+  <title>UFABC Study - Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <header>📚 UFABC Study</header>
 
-  <header>Nome Provisório</header>
+  <main class="dashboard-container">
+    <div class="dashboard-header">
+      <h1>Minhas Anotações</h1>
+    </div>
 
-  <main class="container">
-    <h1>Página Inicial</h1>
-
-    <p class="subtitle">
-      Este é um template base. Personalize com o conteúdo do seu sistema.
-    </p>
-
-    <section class="content">
-      <div class="card">
-        <h3>Seção 1</h3>
-        <p>Conteúdo exemplo...</p>
+    <div id="notesFeed" class="notes-feed">
+      <!-- Notas serão carregadas aqui -->
+      <div class="empty-state">
+        <p>📝 Nenhuma nota adicionada ainda. Clique em "+ Adicionar Nota" para começar!</p>
       </div>
+    </div>
 
-      <div class="card">
-        <h3>Seção 2</h3>
-        <p>Conteúdo exemplo...</p>
-      </div>
-
-      <div class="card">
-        <h3>Seção 3</h3>
-        <p>Conteúdo exemplo...</p>
-      </div>
-    </section>
+    <button id="addNoteBtn" class="btn-add-note">+ Adicionar Nota</button>
   </main>
 
+  <!-- Modal para adicionar nota -->
+  <div id="noteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Adicionar Nota de Aula</h2>
+        <span class="close">&times;</span>
+      </div>
+
+      <form id="noteForm" class="note-form">
+        <div class="form-group">
+          <label for="materia">Nome da Matéria</label>
+          <input type="text" id="materia" name="materia" placeholder="Ex: Matemática, História..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="data">Data da Aula</label>
+          <input type="date" id="data" name="data" required>
+        </div>
+
+        <div class="form-group">
+          <label for="conteudo">Conteúdo</label>
+          <textarea id="conteudo" name="conteudo" placeholder="Digite aqui suas anotações..." rows="6" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="fotos">Fotos (opcional)</label>
+          <input type="file" id="fotos" name="fotos" accept="image/*" multiple>
+          <div id="photoPreview" class="photo-preview"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelBtn" class="btn-cancel">Cancelar</button>
+          <button type="submit" class="btn-submit-modal">Salvar Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script_index.js"></script>
 </body>
 </html>
