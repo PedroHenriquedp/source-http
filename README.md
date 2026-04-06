@@ -1,4 +1,4 @@
-# Projeto de Redes com Sockets em Python
+# UFABC Study - Servidor HTTP com Sockets em Python
 
 ## 📚 UFABC — Universidade Federal do ABC
 
@@ -19,24 +19,37 @@ Desenvolver uma aplicação simples que simule a comunicação cliente-servidor,
 
 ## 🛠️ Tecnologias utilizadas
 
-* Python 3.14
+* Python 3.11
 * Sockets (biblioteca padrão)
 * HTML/CSS (interface simples)
+* Docker e Docker Compose
 * Protocolo HTTP
+* JSON (Banco de dados local)
 
 ---
 
 ## 📁 Estrutura do projeto
 
-```
-/projeto-redes/
-│
-├── server.py        # Servidor socket
-├── client/          # Arquivos do cliente (HTML/CSS/JS)
-│   ├── login.html
-│   ├── index.html
-│   ├── style.css
-│   └── script.js
+```text
+.
+├── deploy.sh
+├── htdocs
+│   ├── cadastro.html
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── login.html
+│   ├── notas.json
+│   ├── __pycache__
+│   │   └── sessao.cpython-312.pyc
+│   ├── script_cadastro.js
+│   ├── script_index.js
+│   ├── script_login.js
+│   ├── servidorHTTP.py
+│   ├── sessao.py
+│   ├── sessoes.json
+│   ├── style.css
+│   └── users.json
 └── README.md
 ```
 
@@ -45,6 +58,10 @@ Desenvolver uma aplicação simples que simule a comunicação cliente-servidor,
 ## 🚀 Como executar
 
 ### 1. Iniciar o servidor
+
+```bash
+cd htdocs
+```
 
 ```bash
 python servidorHTTP.py

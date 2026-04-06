@@ -37,7 +37,7 @@ def handle_request(request_method, headers, body, client_connection):
 
     # --- VALIDAÇÃO DE ACESSO ATRAVÉS DOS COOKIES! Barrar alguém mal intencionado tentando fazer path transversal ---
     if filename not in public_roots and not user_logged:
-        print(f"🔒 Acesso negado para: {filename}. Redirecionando para login...")
+        print(f"Acesso negado para: {filename}. Redirecionando para login...")
         
         response = "HTTP/1.1 302 FOUND\r\nLocation: /login.html\r\n\r\n".encode('utf-8')
         client_connection.sendall(response)
@@ -56,6 +56,35 @@ def handle_request(request_method, headers, body, client_connection):
         except FileNotFoundError as e:
             print(e)
             response = "HTTP/1.1 404 NOT FOUND\n\nERROR 404!File Not Found!".encode()
+    
+    if request_method == "DELETE":
+        try:
+            data = json.loads(body.decode())
+            id_para_deletar = data.get("id")
+
+            notas_file = os.path.join(BASE_DIR, "notas.json")
+            
+            try:
+                with open(notas_file, 'r', encoding='utf-8') as f:
+                    notas = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                notas = []
+
+            # Filtra a lista mantendo apenas as notas que NÃO têm o ID recebido
+            notas_atualizadas = [nota for nota in notas if nota.get("id") != id_para_deletar]
+
+            # Salva a nova lista no arquivo
+            with open(notas_file, 'w', encoding='utf-8') as f:
+                json.dump(notas_atualizadas, f, ensure_ascii=False, indent=2)
+
+            conteudo = json.dumps({"status": "success", "message": "Nota deletada"}).encode('utf-8')
+            response = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + conteudo
+            print(f"Nota {id_para_deletar} deletada com sucesso.")
+
+        except Exception as e:
+            print(f"Erro no DELETE: {e}")
+            erro_msg = json.dumps({"status": "error", "message": "Erro ao deletar"}).encode('utf-8')
+            response = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
 
     if request_method == "POST":
         match filename:
