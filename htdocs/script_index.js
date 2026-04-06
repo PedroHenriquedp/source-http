@@ -1,4 +1,3 @@
-// Elementos
 const modal = document.getElementById('noteModal');
 const addNoteBtn = document.getElementById('addNoteBtn');
 const cancelBtn = document.getElementById('cancelBtn');
@@ -10,13 +9,11 @@ const notesFeed = document.getElementById('notesFeed');
 
 let selectedFiles = [];
 
-// Abrir modal
 addNoteBtn.addEventListener('click', () => {
   modal.classList.add('show');
   document.body.style.overflow = 'hidden';
 });
 
-// Fechar modal
 closeBtn.addEventListener('click', closeModal);
 cancelBtn.addEventListener('click', closeModal);
 
@@ -28,14 +25,12 @@ function closeModal() {
   photoPreview.innerHTML = '';
 }
 
-// Fechar modal ao clicar fora
 window.addEventListener('click', (event) => {
   if (event.target === modal) {
     closeModal();
   }
 });
 
-// Lidar com preview de fotos
 fotosInput.addEventListener('change', (e) => {
   selectedFiles = Array.from(e.target.files);
   updatePhotoPreview();
@@ -63,7 +58,6 @@ function removePhoto(index) {
   updatePhotoPreview();
 }
 
-// Submeter formulário
 noteForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -71,7 +65,6 @@ noteForm.addEventListener('submit', async (e) => {
   const data = document.getElementById('data').value;
   const conteudo = document.getElementById('conteudo').value;
 
-  // Converter fotos para base64
   const fotosBase64 = [];
   for (let file of selectedFiles) {
     const base64 = await fileToBase64(file);
@@ -116,9 +109,7 @@ function fileToBase64(file) {
   });
 }
 
-// Adicionar nota ao feed
 function addNoteToFeed(noteData) {
-  // Remove empty state se existir
   const emptyState = notesFeed.querySelector('.empty-state');
   if (emptyState) {
     emptyState.remove();
@@ -127,7 +118,6 @@ function addNoteToFeed(noteData) {
   const noteCard = document.createElement('div');
   noteCard.className = 'note-card';
 
-  // Formatar data
   const dateObj = new Date(noteData.data + 'T00:00:00');
   const formattedDate = dateObj.toLocaleDateString('pt-BR', {
     weekday: 'short',
@@ -160,7 +150,6 @@ function addNoteToFeed(noteData) {
   notesFeed.insertBefore(noteCard, notesFeed.firstChild);
 }
 
-// Escapar HTML para evitar XSS
 function escapeHtml(text) {
   const map = {
     '&': '&amp;',
@@ -172,7 +161,6 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Definir data mínima como hoje
 document.addEventListener('DOMContentLoaded', () => {
   const dataInput = document.getElementById('data');
   const today = new Date().toISOString().split('T')[0];

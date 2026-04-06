@@ -3,6 +3,7 @@ import os
 import json
 import mimetypes
 import time
+import sessao
 
 SERVER_HOST = ""
 SERVER_PORT = 8080
@@ -22,6 +23,27 @@ def handle_request(request_method, headers, body, client_connection):
     if filename == "/":
         filename = "/login.html"
 
+    # --- VALIDAÇÃO DOS COOKIES! Barrar alguém mal intencionado tentando fazer path transversal ---
+    session_id = None
+    for line in headers:
+        if line.lower().startswith("cookie:"):
+            parts_cookie = line.split(":", 1)[1].strip().split(";")
+            for chunk_cookie in parts_cookie:
+                if "session_id=" in chunk_cookie:
+                    session_id = chunk_cookie.split("=")[1].strip()
+                    break
+    public_roots = ["/login.html", "/cadastro.html", "/script_login.js", "/script_cadastro.js", "/style.css"]
+    user_logged = sessao.session_validator(session_id)
+
+    # --- VALIDAÇÃO DE ACESSO ATRAVÉS DOS COOKIES! Barrar alguém mal intencionado tentando fazer path transversal ---
+    if filename not in public_roots and not user_logged:
+        print(f"🔒 Acesso negado para: {filename}. Redirecionando para login...")
+        
+        response = "HTTP/1.1 302 FOUND\r\nLocation: /login.html\r\n\r\n".encode('utf-8')
+        client_connection.sendall(response)
+        client_connection.close()
+        return
+
     if request_method == "GET":
         try:
             address = os.path.join(BASE_DIR, filename.lstrip('/'))
@@ -37,6 +59,35 @@ def handle_request(request_method, headers, body, client_connection):
 
     if request_method == "POST":
         match filename:
+            case "/cadastro.html":
+                try:
+                    data = json.loads(body.decode())
+                    email = data.get("email")
+                    senha = data.get("senha")
+                    
+                    users_file = os.path.join(BASE_DIR, 'users.json')
+                    
+                    try:
+                        with open(users_file, 'r', encoding='utf-8') as f:
+                            users = json.load(f)
+                    except (FileNotFoundError, json.JSONDecodeError):
+                        users = {}
+
+                    if email in users:
+                        erro_msg = json.dumps({"status": "error", "message": "Este e-mail já está cadastrado."}).encode('utf-8')
+                        response = "HTTP/1.1 409 CONFLICT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
+                    else:
+                        users[email] = senha
+                        with open(users_file, 'w', encoding='utf-8') as f:
+                            json.dump(users, f, indent=4)
+                        
+                        sucesso_msg = json.dumps({"status": "success", "message": "Cadastro aprovado"}).encode('utf-8')
+                        response = "HTTP/1.1 201 CREATED\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + sucesso_msg
+                        
+                except Exception as e:
+                    print(f"Erro no cadastro: {e}")
+                    erro_msg = json.dumps({"status": "error", "message": "Erro interno do servidor"}).encode('utf-8')
+                    response = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
             case "/login.html":
                 try:
                     
@@ -55,8 +106,9 @@ def handle_request(request_method, headers, body, client_connection):
                         client_connection.close()
                         return
                     if email in users and users[email] == senha:
+                        new_session_id = sessao.create_session(email)
                         content = json.dumps({"status": "success", "message": "Login aprovado"}).encode('utf-8')
-                        responde_command = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode()
+                        responde_command = f"HTTP/1.1 200 OK\r\nSet-Cookie: session_id={new_session_id}; Path=/; HttpOnly\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode()
                     else:
                         content = json.dumps({"status": "error", "message": "Login Inválido"}).encode('utf-8')
                         responde_command = "HTTP/1.1 401 UNAUTHORIZED\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode()
