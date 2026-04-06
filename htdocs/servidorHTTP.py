@@ -37,6 +37,35 @@ def handle_request(request_method, headers, body, client_connection):
 
     if request_method == "POST":
         match filename:
+            case "/cadastro.html":
+                try:
+                    data = json.loads(body.decode())
+                    email = data.get("email")
+                    senha = data.get("senha")
+                    
+                    users_file = os.path.join(BASE_DIR, 'users.json')
+                    
+                    try:
+                        with open(users_file, 'r', encoding='utf-8') as f:
+                            users = json.load(f)
+                    except (FileNotFoundError, json.JSONDecodeError):
+                        users = {}
+
+                    if email in users:
+                        erro_msg = json.dumps({"status": "error", "message": "Este e-mail já está cadastrado."}).encode('utf-8')
+                        response = "HTTP/1.1 409 CONFLICT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
+                    else:
+                        users[email] = senha
+                        with open(users_file, 'w', encoding='utf-8') as f:
+                            json.dump(users, f, indent=4)
+                        
+                        sucesso_msg = json.dumps({"status": "success", "message": "Cadastro aprovado"}).encode('utf-8')
+                        response = "HTTP/1.1 201 CREATED\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + sucesso_msg
+                        
+                except Exception as e:
+                    print(f"Erro no cadastro: {e}")
+                    erro_msg = json.dumps({"status": "error", "message": "Erro interno do servidor"}).encode('utf-8')
+                    response = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\nContent-Type: application/json; charset=utf-8\r\n\r\n".encode() + erro_msg
             case "/login.html":
                 try:
                     
