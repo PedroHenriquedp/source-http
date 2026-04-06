@@ -131,10 +131,13 @@ function addNoteToFeed(noteData) {
   let notesHTML = `
     <div class="note-header">
       <div class="note-title">${escapeHtml(noteData.materia)}</div>
-      <div class="note-date">${formattedDate}</div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="note-date">${formattedDate}</div>
+        <button class="btn-delete" onclick="deletarNota(${noteData.id}, event)">Excluir</button>
+      </div>
     </div>
     <div class="note-content">${escapeHtml(noteData.conteudo)}</div>
-  `;
+    `;
 
   if (noteData.fotos && noteData.fotos.length > 0) {
     notesHTML += '<div class="note-photos">';
@@ -234,3 +237,32 @@ window.addEventListener('click', (event) => {
     closeViewModalFunc();
   }
 });
+
+async function deletarNota(id, event) {
+  event.stopPropagation(); 
+
+  if (!confirm("Tem certeza que deseja excluir esta nota?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/index.html', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: id })
+    });
+
+    if (response.ok) {
+      alert("Nota excluída com sucesso!");
+      // Recarrega a página para atualizar o feed
+      window.location.reload(); 
+    } else {
+      alert("Erro ao excluir a nota.");
+    }
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro de conexão ao tentar excluir.");
+  }
+}
