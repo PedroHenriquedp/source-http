@@ -6,6 +6,8 @@ const noteForm = document.getElementById('noteForm');
 const fotosInput = document.getElementById('fotos');
 const photoPreview = document.getElementById('photoPreview');
 const notesFeed = document.getElementById('notesFeed');
+const viewModal = document.getElementById('viewNoteModal');
+const closeViewBtn = document.querySelector('.close-view');
 
 let selectedFiles = [];
 
@@ -147,6 +149,7 @@ function addNoteToFeed(noteData) {
   }
 
   noteCard.innerHTML = notesHTML;
+  noteCard.addEventListener('click', () => openViewModal(noteData));
   notesFeed.insertBefore(noteCard, notesFeed.firstChild);
 }
 
@@ -191,3 +194,43 @@ function loadNotesFromServer() {
       console.log('Nenhuma nota salva ainda');
     });
 }
+
+function openViewModal(noteData) {
+  document.getElementById('viewMateriaTitle').textContent = noteData.materia;
+  
+  const dateObj = new Date(noteData.data + 'T00:00:00');
+  document.getElementById('viewDataDate').textContent = dateObj.toLocaleDateString('pt-BR', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+
+  document.getElementById('viewConteudoText').textContent = noteData.conteudo;
+
+  const fotosContainer = document.getElementById('viewFotosContainer');
+  fotosContainer.innerHTML = '';
+  
+  if (noteData.fotos && noteData.fotos.length > 0) {
+    noteData.fotos.forEach((photo) => {
+      fotosContainer.innerHTML += `
+        <div style="width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <img src="${photo}" style="width: 100%; height: auto; display: block;">
+        </div>
+      `;
+    });
+  }
+
+  viewModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeViewModalFunc() {
+  viewModal.classList.remove('show');
+  document.body.style.overflow = 'auto';
+}
+
+closeViewBtn.addEventListener('click', closeViewModalFunc);
+
+window.addEventListener('click', (event) => {
+  if (event.target === viewModal) {
+    closeViewModalFunc();
+  }
+});

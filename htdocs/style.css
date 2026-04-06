@@ -601,3 +601,27 @@ header.dashboard-header {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
+
+.note-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #10b981;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease-out;
+  cursor: pointer;
+}
+
+.close-view {
+  color: #718096;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-view:hover {
+  color: #059669;
+  transform: scale(1.2);
+}
